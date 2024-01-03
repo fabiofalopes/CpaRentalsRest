@@ -1,0 +1,55 @@
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Scanner;
+
+public class GetTabela {
+
+    public static void main(String[] args) {
+        int idUser = 1; // Example user ID
+        String data = "2023-04-01"; // Example date
+        String idPraia = "A"; // Example beach ID
+
+        try {
+            // Construct the query parameters
+            String queryParams = String.format("idUser=%d&data=%s&idPraia=%s", idUser, data, idPraia);
+            // Update the URL to include the path and query parameters
+            URL url = new URL("http://localhost:8080/CpaRentalsRestUtility/rest/getDailyOcupationTable?" + queryParams);
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            // Set the expected content type of the response
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            Scanner scanner = new Scanner(conn.getInputStream());
+            String response;
+
+            if (conn.getResponseCode() != 200) {
+                if (conn.getErrorStream() != null) {
+                    scanner = new Scanner(conn.getErrorStream());
+                    response = "Error From Server \n\n";
+                } else {
+                    response = "Error Stream is null";
+                }
+            } else {
+                if (conn.getInputStream() != null) {
+                    scanner = new Scanner(conn.getInputStream());
+                    response = "Response From Server \n\n";
+                } else {
+                    response = "Input Stream is null";
+                }
+            }
+
+            scanner.useDelimiter("\\Z");
+            System.out.println(response + scanner.next());
+            scanner.close();
+            conn.disconnect();
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
